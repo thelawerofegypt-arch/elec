@@ -1,0 +1,28 @@
+
+{
+  "short_name": "انتدابات النيابة",
+  "name": "نظام إدارة انتدابات النيابة الإدارية",
+  "description": "نظام ذكي لإدارة وتوزيع انتدابات موظفي هيئة النيابة الإدارية للجان الانتخابية، يضمن العدالة والشفافية.",
+  "icons": [
+    {
+      "src": "https://picsum.photos/seed/legal/192/192",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://picsum.photos/seed/legal/512/512",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#064e3b",
+  "background_color": "#f8fafc",
+  "scope": "./",
+  "lang": "ar",
+  "dir": "rtl"
+}
