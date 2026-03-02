@@ -1,60 +1,52 @@
+const CACHE_NAME = 'election-system-v1';
 
-const CACHE_NAME = 'election-system-v4-stable';
-
-const ASSETS_TO_PRECACHE = [
-  './',
-  './index.html',
-  './index.tsx',
-  './manifest.json',
-  'https://cdn.tailwindcss.com',
-  'https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap'
+const ASSETS_TO_CACHE = [
+    '/',
+    '/index.html',
+    '/assets/index.js',
+    '/manifest.json',
+    '/icons/icon-192.png',
+    '/icons/icon-512.png'
 ];
 
-const EXTERNAL_LIBS = [
-  'esm.sh',
-  'cdn.jsdelivr.net',
-  'fonts.gstatic.com',
-  'picsum.photos'
-];
-
+// تثبيت Service Worker
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return Promise.allSettled(ASSETS_TO_PRECACHE.map(url => cache.add(url)));
-    })
-  );
-  self.skipWaiting();
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => cache.addAll(ASSETS_TO_CACHE))
+    );
+    self.skipWaiting();
 });
 
+// تفعيل Service Worker وحذف Cache قديمة
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) => Promise.all(
-      keys.map(key => key !== CACHE_NAME ? caches.delete(key) : null)
-    ))
-  );
-  self.clients.claim();
+    event.waitUntil(
+        caches.keys().then(keys =>
+            Promise.all(
+                keys.map(key => {
+                    if (key !== CACHE_NAME) return caches.delete(key);
+                })
+            )
+        )
+    );
+    self.clients.claim();
 });
 
+// التقاط جميع طلبات Fetch
 self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
+    if (event.request.method !== 'GET') return;
 
-  const url = new URL(event.request.url);
-
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
-          const cacheCopy = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, cacheCopy));
-        }
-        return networkResponse;
-      }).catch(() => {
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
-      });
-
-      return cachedResponse || fetchPromise;
-    })
-  );
+    event.respondWith(
+        caches.match(event.request)
+            .then(response => response || fetch(event.request)
+                .then(networkResponse => {
+                    if (networkResponse && networkResponse.status === 200) {
+                        const clone = networkResponse.clone();
+                        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+                    }
+                    return networkResponse;
+                })
+                .catch(() => caches.match('/index.html'))
+            )
+    );
 });
